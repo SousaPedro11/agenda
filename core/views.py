@@ -1,8 +1,11 @@
+import json
 from pyexpat.errors import messages
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect
 
 from core.models import Evento
@@ -85,7 +88,27 @@ def evento_submit(request):
 @login_required(login_url='/login/')
 def evento_delete(request, id_evento):
     usuario = request.user
-    evento = Evento.objects.get(id=id_evento)
+    try:
+        evento = Evento.objects.get(id=id_evento)
+    except Exception:
+        raise Http404
+
     if usuario == evento.usuario:
         evento.delete()
+    else:
+        raise Http404
+
     return redirect('/')
+
+
+@login_required(login_url='/login/')
+def evento_json(request, id_usuario):
+    if id_usuario is None:
+        usuario = request.user
+    else:
+        usuario = User.objects.get(id=id_usuario)
+    try:
+        evento = Evento.objects.filter(usuario=usuario).values()
+    except Exception:
+        raise Http404
+    return JsonResponse(list(evento), safe=False)
