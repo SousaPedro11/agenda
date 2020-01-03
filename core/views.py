@@ -1,10 +1,11 @@
 from pyexpat.errors import messages
 
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+
 from core.models import Evento
-from django.contrib import messages
 
 
 # Create your views here.
@@ -38,5 +39,26 @@ def lista_eventos(request):
     dados = {'eventos': eventos}
     return render(request, 'agenda.html', dados)
 
+
 # def index(request):
 #     return redirect('/agenda')
+
+@login_required(login_url='/login/')
+def evento(request):
+    return render(request, 'evento.html')
+
+
+@login_required(login_url='/login/')
+def evento_submit(request):
+    if request.POST:
+        titulo = request.POST.get('titulo')
+        data_evento = request.POST.get('data_evento')
+        descricao = request.POST.get('descricao')
+        usuario = request.user
+
+        Evento.objects.create(titulo=titulo,
+                              data_evento=data_evento,
+                              descricao=descricao,
+                              usuario=usuario
+                              )
+        return redirect('/')
