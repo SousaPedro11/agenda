@@ -26,7 +26,4 @@ class Evento(models.Model):
         return self.data_evento.strftime('%Y-%m-%dT%H:%M')
 
     def evento_atrasado(self):
-        if self.data_evento < datetime.now():
-            return True
-        else:
-            return False
+        return self.data_evento < datetime.now()
